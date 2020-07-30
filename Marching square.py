@@ -1,5 +1,5 @@
 import pygame as pg
-import numpy as np
+from opensimplex import OpenSimplex
 
 pg.init()
 
@@ -13,29 +13,30 @@ screen = pg.display.set_mode((width, height))
 
 pg.display.set_caption("Marching Squares")
 
-distance = 20
-block_probability = 0.7
+distance = 10
+block_probability = 0.5
+noise = OpenSimplex()
 nodes = []
 
 class node:
-	def __init__(self, x, y):
+	def __init__(self, x, y, p):
 		self.x = x
 		self.y = y
 		self.r = 2
+		self.p = p
 		self.center = (x, y)
-		p = np.random.rand()
-		if p >= block_probability:
+		if self.p >= block_probability:
 			self.color = (round(p*255),)*3
 		else:
 			self.color = black
 	def show_node(self):
 		pg.draw.circle(screen, self.color, self.center, self.r)
 
-def make_nodes():
+def make_nodes(t):
 	for j in range(0, height, distance):
 		row = []
 		for i in range(0, width, distance):
-			row.append(node(i, j))
+			row.append(node(i, j, noise.noise2d(i*0.01+t, j*0.01+t)))
 		nodes.append(row)
 
 def show_nodes():
@@ -93,14 +94,18 @@ def show_contour():
 
 def initialize():
 	running = True
+	time = 0
 	while running:
 		for event in pg.event.get():
 			if event.type == pg.QUIT:
 				running = False
 		screen.fill(black)
+		if time%5 == 0 :
+			nodes.clear()
+			make_nodes(time/100)
 		show_nodes()
 		show_contour()
 		pg.display.update()
+		time += 1
 
-make_nodes()
 initialize()
