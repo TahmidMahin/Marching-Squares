@@ -13,7 +13,7 @@ screen = pg.display.set_mode((width, height))
 
 pg.display.set_caption("Marching Squares")
 
-distance = 10
+distance = 20
 block_probability = 0.5
 noise = OpenSimplex()
 nodes = []
@@ -23,7 +23,7 @@ class node:
 		self.x = x
 		self.y = y
 		self.r = 2
-		self.p = p
+		self.p = (p+1)/2
 		self.center = (x, y)
 		if self.p >= block_probability:
 			self.color = (round(p*255),)*3
@@ -36,7 +36,7 @@ def make_nodes(t):
 	for j in range(0, height, distance):
 		row = []
 		for i in range(0, width, distance):
-			row.append(node(i, j, noise.noise2d(i*0.01+t, j*0.01+t)))
+			row.append(node(i, j, noise.noise3d(i, j, t)))
 		nodes.append(row)
 
 def show_nodes():
@@ -94,7 +94,7 @@ def show_contour():
 
 def initialize():
 	running = True
-	time = 0
+	time = -10000
 	while running:
 		for event in pg.event.get():
 			if event.type == pg.QUIT:
@@ -102,7 +102,9 @@ def initialize():
 		screen.fill(black)
 		if time%5 == 0 :
 			nodes.clear()
-			make_nodes(time/100)
+			make_nodes(time/500)
+			if time == 100000:
+				time = 0
 		show_nodes()
 		show_contour()
 		pg.display.update()
